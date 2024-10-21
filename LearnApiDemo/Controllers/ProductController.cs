@@ -142,6 +142,52 @@ namespace LearnApiDemo.Controllers
             return Ok(imageUrl);
         }
 
+        [HttpGet("GetMultiImage")]
+        public async Task<IActionResult> GetMultiImage(string productCode)
+        {
+            List<string> imageUrl = new List<string>();
+
+            //getting Host url, for eg. LocalHost or any other hosting env, so we have to get that dynamically
+            string hostUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            try
+            {
+                string filePath = GetFilePath(productCode);
+
+                // Check if the directory exists
+                if (!System.IO.Directory.Exists(filePath))
+                {
+                    return NotFound(); // Return NotFound if directory does not exist
+                }
+
+                DirectoryInfo directoryInfo = new DirectoryInfo(filePath);
+                FileInfo[] fileInfos = directoryInfo.GetFiles();
+
+                if (fileInfos.Length == 0)
+                {
+                    return NotFound(); // Return NotFound if no files exist
+                }
+
+                foreach (FileInfo fileInfo in fileInfos)
+                {
+                    string fileName = fileInfo.Name;
+                    string imagePath = Path.Combine(filePath, fileName); // Use Path.Combine for path formation
+
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        string _imageUrl = hostUrl + "/Upload/product/" + productCode + "/" + fileName;
+                        imageUrl.Add(_imageUrl);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return Ok(imageUrl);
+        }
+
         [NonAction]
         private string GetFilePath(string productCode)
         {
