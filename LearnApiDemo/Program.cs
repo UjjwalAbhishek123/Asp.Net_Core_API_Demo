@@ -5,6 +5,7 @@ using LearnApiDemo.Repositories;
 using LearnApiDemo.RepositoryImplementation;
 using LearnApiDemo.ServiceImplementation;
 using LearnApiDemo.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -24,6 +25,9 @@ builder.Services.AddTransient<ICustomerService, CustomerService>();
 
 //Register Connection String
 builder.Services.AddDbContext<LearnApiDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("apiCon")));
+
+//Registering basic authentication
+builder.Services.AddAuthentication("BasicAuthentication").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
 //Crceating Mapper Configs & Registering Automapper
 var autoMapper = new MapperConfiguration(item => item.AddProfile(new AutoMapperHandler()));
@@ -84,6 +88,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 
 app.UseHttpsRedirection();
+
+//authentication middleware
+app.UseAuthentication();
 
 app.UseAuthorization();
 

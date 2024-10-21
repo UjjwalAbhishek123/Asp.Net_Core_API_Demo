@@ -1,5 +1,6 @@
 ﻿using LearnApiDemo.DTOs;
 using LearnApiDemo.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace LearnApiDemo.Controllers
 {
+    [Authorize]
     //[DisableCors]
     [EnableRateLimiting("fixedWindow")]
     [Route("api/[controller]")]
@@ -21,6 +23,7 @@ namespace LearnApiDemo.Controllers
             _customerService = customerService;
         }
 
+        [AllowAnonymous]
         //[EnableCors("corspolicy1")]
         [HttpGet("GetAllCustomer")]
         public async Task<IActionResult> GetAllResult()

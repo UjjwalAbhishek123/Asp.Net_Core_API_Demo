@@ -18,7 +18,11 @@ public partial class LearnApiDbContext : DbContext
 
     public virtual DbSet<TblCustomer> TblCustomers { get; set; }
 
+    public virtual DbSet<TblRefreshToken> TblRefreshTokens { get; set; }
+
     public virtual DbSet<TblUser> TblUsers { get; set; }
+
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
