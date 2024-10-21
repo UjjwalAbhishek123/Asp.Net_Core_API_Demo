@@ -26,6 +26,7 @@
     <Folder Include="Data\" />
     <Folder Include="Models\" />
     <Folder Include="Logs\" />
+    <Folder Include="wwwroot\Upload\product\" />
   </ItemGroup>
 
 </Project>
