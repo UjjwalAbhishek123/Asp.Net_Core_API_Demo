@@ -10,7 +10,7 @@ namespace LearnApiDemo.Controllers
 {
     [Authorize]
     //[DisableCors]
-    [EnableRateLimiting("fixedWindow")]
+    //[EnableRateLimiting("fixedWindow")]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase

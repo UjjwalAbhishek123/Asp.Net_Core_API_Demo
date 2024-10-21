@@ -1,14 +1,18 @@
 using AutoMapper;
 using LearnApiDemo.Data;
+using LearnApiDemo.DTOs;
 using LearnApiDemo.Helper;
 using LearnApiDemo.Repositories;
 using LearnApiDemo.RepositoryImplementation;
 using LearnApiDemo.ServiceImplementation;
 using LearnApiDemo.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,11 +27,35 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddTransient<ICustomerService, CustomerService>();
 
+builder.Services.AddTransient<IRefreshHandlerRepository, RefreshHandlerRepository>();
+builder.Services.AddTransient<IRefreshHandlerService, RefreshHandlerService>();
+
 //Register Connection String
 builder.Services.AddDbContext<LearnApiDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("apiCon")));
 
 //Registering basic authentication
-builder.Services.AddAuthentication("BasicAuthentication").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+//commented due to JWT implementation
+//builder.Services.AddAuthentication("BasicAuthentication").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+var _authKey = builder.Configuration.GetValue<string>("JwtSettings:securityKey");
+//Registering JWT Auth
+builder.Services.AddAuthentication(item =>
+{
+    item.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    item.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(item =>
+{
+    item.RequireHttpsMetadata = true;
+    item.SaveToken = true;
+    item.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authKey)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 //Crceating Mapper Configs & Registering Automapper
 var autoMapper = new MapperConfiguration(item => item.AddProfile(new AutoMapperHandler()));
@@ -72,6 +100,11 @@ Log.Logger = new LoggerConfiguration()
 
 //Use Serilog for Logging
 builder.Host.UseSerilog();
+
+//Configuring JwtSettings
+var _jwtSetting = builder.Configuration.GetSection("JwtSettings");
+
+builder.Services.Configure<JwtSettings>(_jwtSetting);
 
 var app = builder.Build();
 
