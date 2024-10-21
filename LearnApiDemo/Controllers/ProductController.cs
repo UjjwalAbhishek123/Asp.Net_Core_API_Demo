@@ -258,6 +258,40 @@ namespace LearnApiDemo.Controllers
             }
         }
 
+        [HttpGet("multiRemove")]
+        public async Task<IActionResult> MultiRemove(string productCode)
+        {
+            //string imageUrl = string.Empty;
+
+            //getting Host url, for eg. LocalHost or any other hosting env, so we have to get that dynamically
+            //string hostUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            try
+            {
+                string filePath = GetFilePath(productCode);
+
+                if (System.IO.Directory.Exists(filePath))
+                {
+                    DirectoryInfo directoryInfo = new DirectoryInfo(filePath);
+                    FileInfo[] fileInfos = directoryInfo.GetFiles();
+
+                    foreach (FileInfo fileInfo in fileInfos)
+                    {
+                        fileInfo.Delete();
+                    }
+                    return Ok("pass");
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
         [NonAction]
         private string GetFilePath(string productCode)
         {
