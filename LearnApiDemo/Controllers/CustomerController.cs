@@ -1,10 +1,12 @@
 ﻿using LearnApiDemo.DTOs;
 using LearnApiDemo.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnApiDemo.Controllers
 {
+    //[DisableCors]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -17,6 +19,7 @@ namespace LearnApiDemo.Controllers
             _customerService = customerService;
         }
 
+        //[EnableCors("corspolicy1")]
         [HttpGet("GetAllCustomer")]
         public async Task<IActionResult> GetAllResult()
         {

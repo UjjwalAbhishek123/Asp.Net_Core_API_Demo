@@ -6,18 +6,22 @@ namespace LearnApiDemo.DTOs
 {
     public class CustomerDto
     {
+        [Required(ErrorMessage = "Code is required")]
         [StringLength(50)]
         [Unicode(false)]
         public string Code { get; set; } = null!;
 
+        [Required(ErrorMessage = "Code is required")]
         [StringLength(50)]
         [Unicode(false)]
         public string Name { get; set; } = null!;
 
+        [EmailAddress(ErrorMessage = "Invalid email format")]
         [StringLength(50)]
         [Unicode(false)]
         public string? Email { get; set; }
 
+        [Phone(ErrorMessage = "Invalid phone format")]
         [StringLength(50)]
         [Unicode(false)]
         public string? Phone { get; set; }

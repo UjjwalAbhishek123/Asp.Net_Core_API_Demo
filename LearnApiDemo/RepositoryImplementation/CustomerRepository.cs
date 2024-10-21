@@ -5,6 +5,7 @@ using LearnApiDemo.Helper;
 using LearnApiDemo.Models;
 using LearnApiDemo.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LearnApiDemo.RepositoryImplementation
@@ -27,8 +28,27 @@ namespace LearnApiDemo.RepositoryImplementation
         {
             ApiResponse response = new ApiResponse();
 
+            // Manual validation checks
+            if (string.IsNullOrWhiteSpace(data.Code) || data.Code == "string")
+            {
+                response.ResponseCode = 400;
+                response.ErrorMessage = "Code cannot be 'string' or empty.";
+                Log.Error("Validation failed: {ErrorMessage}", response.ErrorMessage);
+                return response;
+            }
+
+            if (string.IsNullOrWhiteSpace(data.Name) || data.Name == "string")
+            {
+                response.ResponseCode = 400;
+                response.ErrorMessage = "Name cannot be 'string' or empty.";
+                Log.Error("Validation failed: {ErrorMessage}", response.ErrorMessage);
+                return response;
+            }
+
             try
             {
+                Log.Information("Create starts..");
+
                 TblCustomer _customer = _mapper.Map<CustomerDto, TblCustomer>(data);
 
                 await _dbContext.TblCustomers.AddAsync(_customer);
@@ -44,6 +64,9 @@ namespace LearnApiDemo.RepositoryImplementation
                 //if any error occur => negative scenario response code will be 400
                 response.ResponseCode = 400;
                 response.ErrorMessage = ex.Message;
+
+                //Log complete error stack trace
+                Log.Error(ex.Message, ex);
             }
 
             return response;
