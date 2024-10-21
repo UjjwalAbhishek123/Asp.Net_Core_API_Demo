@@ -117,6 +117,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+//Static File middleware
+app.UseStaticFiles();
+
 //CORS middleware
 app.UseCors();
 

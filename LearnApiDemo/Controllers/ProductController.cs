@@ -110,6 +110,38 @@ namespace LearnApiDemo.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetImage")]
+        public async Task<IActionResult> GetImage(string productCode)
+        {
+            string imageUrl = string.Empty;
+
+            //getting Host url, for eg. LocalHost or any other hosting env, so we have to get that dynamically
+            string hostUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            try
+            {
+                string filePath = GetFilePath(productCode);
+
+                string imagePath = filePath + "\\" + productCode + ".png";
+
+                if (System.IO.File.Exists(imagePath))
+                {
+                    //forming url
+                    imageUrl = hostUrl + "/Upload/product/" + productCode + "/" + productCode + ".png";
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            return Ok(imageUrl);
+        }
+
         [NonAction]
         private string GetFilePath(string productCode)
         {
