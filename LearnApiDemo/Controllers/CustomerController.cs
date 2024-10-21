@@ -3,10 +3,12 @@ using LearnApiDemo.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LearnApiDemo.Controllers
 {
     //[DisableCors]
+    [EnableRateLimiting("fixedWindow")]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -33,6 +35,7 @@ namespace LearnApiDemo.Controllers
             return Ok(data);
         }
 
+        [DisableRateLimiting]
         [HttpGet("GetByCode")]
         public async Task<IActionResult> GetByCode(string code)
         {

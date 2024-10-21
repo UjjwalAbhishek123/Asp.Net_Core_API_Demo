@@ -5,6 +5,7 @@ using LearnApiDemo.Repositories;
 using LearnApiDemo.RepositoryImplementation;
 using LearnApiDemo.ServiceImplementation;
 using LearnApiDemo.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -49,6 +50,15 @@ builder.Services.AddCors(policy => policy.AddDefaultPolicy(build =>
     build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
+//enabling RateLimiter
+builder.Services.AddRateLimiter(rl => rl.AddFixedWindowLimiter(policyName: "fixedWindow", options =>
+{
+    options.Window = TimeSpan.FromSeconds(10);
+    options.PermitLimit = 1;
+    options.QueueLimit = 0;
+    options.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+}).RejectionStatusCode = 401);
+
 //Adding Serilog Configs
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -60,6 +70,8 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 var app = builder.Build();
+
+app.UseRateLimiter();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
