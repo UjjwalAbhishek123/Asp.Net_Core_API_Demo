@@ -188,6 +188,76 @@ namespace LearnApiDemo.Controllers
             return Ok(imageUrl);
         }
 
+        [HttpGet("Download")]
+        public async Task<IActionResult> Download(string productCode)
+        {
+            //string imageUrl = string.Empty;
+
+            //getting Host url, for eg. LocalHost or any other hosting env, so we have to get that dynamically
+            //string hostUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            try
+            {
+                string filePath = GetFilePath(productCode);
+
+                string imagePath = filePath + "\\" + productCode + ".png";
+
+                if (System.IO.File.Exists(imagePath))
+                {
+                    //creating Memory Stream
+                    MemoryStream stream = new MemoryStream();
+
+                    using (FileStream fileStream = new FileStream(imagePath, FileMode.Open))
+                    {
+                        await fileStream.CopyToAsync(stream);
+                    }
+
+                    stream.Position = 0;
+
+                    return File(stream, "image/png", productCode + ".png");
+                    //Imageurl = hosturl + "/Upload/product/" + productcode + "/" + productcode + ".png";
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpGet("remove")]
+        public async Task<IActionResult> Remove(string productCode)
+        {
+            //string imageUrl = string.Empty;
+
+            //getting Host url, for eg. LocalHost or any other hosting env, so we have to get that dynamically
+            //string hostUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+            try
+            {
+                string filePath = GetFilePath(productCode);
+
+                string imagePath = filePath + "\\" + productCode + ".png";
+
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                    return Ok("image deleted");
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
         [NonAction]
         private string GetFilePath(string productCode)
         {
