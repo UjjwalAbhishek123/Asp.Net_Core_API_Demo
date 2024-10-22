@@ -2,6 +2,7 @@ using AutoMapper;
 using LearnApiDemo.Data;
 using LearnApiDemo.DTOs;
 using LearnApiDemo.Helper;
+using LearnApiDemo.Models;
 using LearnApiDemo.Repositories;
 using LearnApiDemo.RepositoryImplementation;
 using LearnApiDemo.ServiceImplementation;
@@ -107,6 +108,55 @@ var _jwtSetting = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(_jwtSetting);
 
 var app = builder.Build();
+
+//Implementation of basic CRUD using Minimal API
+app.MapGet("/minimalapi", () => "Learning Application");
+
+app.MapGet("/getAddress", (string getAddress) => "Welcome to " + getAddress).WithOpenApi(opt =>
+{
+    var parameter = opt.Parameters[0];
+    parameter.Description = "Enter Address";
+    return opt;
+});
+
+app.MapGet("/getCustomer", async (LearnApiDbContext db) =>
+{
+    return await db.TblCustomers.ToListAsync();
+});
+
+app.MapGet("/getCustomerByCode/{code}", async (LearnApiDbContext db, string code) =>
+{
+    return await db.TblCustomers.FindAsync(code);
+});
+
+app.MapPost("/createCustomer", async (LearnApiDbContext db, TblCustomer customer) =>
+{
+    await db.TblCustomers.AddAsync(customer);
+    await db.SaveChangesAsync();
+});
+
+app.MapPut("/updateCustomer/{code}", async (LearnApiDbContext db, TblCustomer customer, string code) =>
+{
+    var existData = await db.TblCustomers.FindAsync(code);
+
+    if (existData != null)
+    {
+        existData.Name = customer.Name;
+        existData.Email = customer.Email;
+    }
+    await db.SaveChangesAsync();
+});
+
+app.MapDelete("/removeCustomer/{code}", async (LearnApiDbContext db, string code) =>
+{
+    var existData = await db.TblCustomers.FindAsync(code);
+
+    if (existData != null)
+    {
+        db.TblCustomers.Remove(existData);
+    }
+    await db.SaveChangesAsync();
+});
 
 app.UseRateLimiter();
 
