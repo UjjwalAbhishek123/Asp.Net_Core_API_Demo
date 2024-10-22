@@ -1,6 +1,8 @@
-﻿using LearnApiDemo.Helper;
+﻿using LearnApiDemo.Data;
+using LearnApiDemo.Helper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
 
 namespace LearnApiDemo.Controllers
@@ -12,9 +14,11 @@ namespace LearnApiDemo.Controllers
         //To use wwwroot folder, create IWebHostEnvironment field
         private readonly IWebHostEnvironment _environment;
 
-        public ProductController(IWebHostEnvironment environment)
+        private readonly LearnApiDbContext _dbContext;
+        public ProductController(IWebHostEnvironment environment, LearnApiDbContext dbContext)
         {
             _environment = environment;
+            _dbContext = dbContext;
         }
 
         [HttpPut("UploadImage")]
@@ -291,6 +295,95 @@ namespace LearnApiDemo.Controllers
                 return NotFound();
             }
         }
+
+        [HttpPut("DBMultiUploadImage")]
+        public async Task<IActionResult> DBMultiUploadImage(IFormFileCollection formFileCollection, string productCode)
+        {
+            ApiResponse response = new ApiResponse();
+            int passCount = 0, errorCount = 0;
+
+            try
+            {
+                foreach (var file in formFileCollection)
+                {
+                    //Convert the file int memory stream
+                    using(MemoryStream stream = new MemoryStream())
+                    {
+                        //copy file to memory stream
+                        await file.CopyToAsync(stream);
+                        _dbContext.TblProductImages.Add(new Models.TblProductImage()
+                        {
+                            ProductCode = productCode,
+                            ProductImage = stream.ToArray()
+                        });
+
+                        await _dbContext.SaveChangesAsync();
+                        passCount++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errorCount++;
+                response.ErrorMessage = ex.Message;
+            }
+
+            response.ResponseCode = 200;
+            response.Result = passCount + " Files uploaded & " + errorCount + " files failed";
+            return Ok(response);
+        }
+
+        [HttpGet("GetDBMultiImage")]
+        public async Task<IActionResult> GetDBMultiImage(string productCode)
+        {
+            List<string> imageUrl = new List<string>();
+
+            try
+            {
+                var _productImage = _dbContext.TblProductImages.Where(item => item.ProductCode == productCode).ToList();
+
+                if(_productImage!=null && _productImage.Count > 0)
+                {
+                    _productImage.ForEach(item =>
+                    {
+                        imageUrl.Add(Convert.ToBase64String(item.ProductImage));
+                    });
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return Ok(imageUrl);
+        }
+
+        [HttpGet("DBDownload")]
+        public async Task<IActionResult> DbDownload(string productCode)
+        {
+            try
+            {
+                var _productImage = await _dbContext.TblProductImages.FirstOrDefaultAsync(item => item.ProductCode == productCode);
+
+                if (_productImage != null)
+                {
+                    return File(_productImage.ProductImage, "image/png", productCode + ".png");
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
 
         [NonAction]
         private string GetFilePath(string productCode)
