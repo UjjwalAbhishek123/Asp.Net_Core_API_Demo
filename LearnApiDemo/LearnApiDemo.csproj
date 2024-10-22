@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="ClosedXML" Version="0.104.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
       <PrivateAssets>all</PrivateAssets>
@@ -26,6 +27,7 @@
     <Folder Include="Data\" />
     <Folder Include="Models\" />
     <Folder Include="Logs\" />
+    <Folder Include="wwwroot\Export\" />
     <Folder Include="wwwroot\Upload\product\" />
   </ItemGroup>
 
